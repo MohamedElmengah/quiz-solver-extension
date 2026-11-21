@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Potatoes",
+  "version": "3.0.0",
+  "description": "Hybrid 3-agent (Gemini + 2x Groq) quiz assistant.",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_title": "Potatoes",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "permissions": ["sidePanel", "storage", "activeTab", "scripting"],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.groq.com/*",
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "minimum_chrome_version": "116"
+}

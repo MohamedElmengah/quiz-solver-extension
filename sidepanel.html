@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Potatoes</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #1a1d24;
+      --border: #2a2f3a;
+      --text: #e6e8ee;
+      --muted: #9aa3b2;
+      --accent: #f5b942;
+      --ok: #22c55e;
+      --err: #ef4444;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 14px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    h1 { font-size: 18px; margin: 0 0 12px; color: var(--accent); }
+    label { display: block; color: var(--muted); margin: 8px 0 4px; font-size: 12px; }
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      direction: ltr;
+      text-align: left;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+    }
+    input:focus { outline: 1px solid var(--accent); }
+    input:disabled { opacity: 0.6; }
+    button {
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button:disabled { opacity: 0.45; cursor: not-allowed; }
+    #toggleKeys {
+      margin-top: 8px;
+      width: 100%;
+      background: var(--card);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 7px;
+      font-size: 12px;
+    }
+    .actions { display: flex; gap: 8px; margin-top: 14px; }
+    #startBtn { flex: 2; background: var(--accent); color: #1a1300; }
+    #stopBtn { flex: 1; background: var(--err); color: #fff; }
+    #status { margin-top: 12px; padding: 10px; border-radius: 8px; display: none; }
+    #status.info { display: block; background: #1c2433; color: #9cc2ff; }
+    #status.error { display: block; background: #2a1517; color: #ff9b9b; border: 1px solid var(--err); }
+    #status.success { display: block; background: #12261a; color: #86efac; }
+    #status.warn { display: block; background: #2b2110; color: #fcd34d; border: 1px solid var(--warn); }
+    #log { margin-top: 12px; display: flex; flex-direction: column; gap: 10px; }
+    .screen-title { color: var(--accent); font-size: 12px; margin-top: 4px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .q { font-weight: 600; margin-bottom: 8px; }
+    .row { font-size: 13px; margin-bottom: 4px; }
+    .row span { color: var(--muted); }
+    .final { color: var(--ok); font-weight: 600; margin-top: 6px; }
+    .reason { color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      margin-inline-start: 6px;
+    }
+    .badge.agree { background: #12261a; color: #86efac; }
+    .badge.disagree { background: #2b2110; color: #fcd34d; }
+  </style>
+</head>
+<body>
+  <h1>Potatoes 🥔</h1>
+
+  <label for="geminiKey1">Solver 1 — Google Gemini API Key (يبدأ بـ AIza...)</label>
+  <input id="geminiKey1" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false" />
+
+  <label for="groqKey2">Solver 2 — Groq API Key #1 (يبدأ بـ gsk_...)</label>
+  <input id="groqKey2" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false" />
+
+  <label for="groqJudgeKey3">Judge Agent 3 — Groq API Key #2 (يبدأ بـ gsk_...)</label>
+  <input id="groqJudgeKey3" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false" />
+
+  <button id="toggleKeys" type="button">إظهار المفاتيح</button>
+
+  <div class="actions">
+    <button id="startBtn" type="button">Start Auto-Solve</button>
+    <button id="stopBtn" type="button" disabled>Stop</button>
+  </div>
+
+  <div id="status"></div>
+  <div id="log"></div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
