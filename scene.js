@@ -16,12 +16,12 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // ثلج هادي وبطيء جداً
+  // Slow, gentle falling snow
   const snowflakes = Array.from({ length: 38 }, () => ({
     x: Math.random() * 400,
     y: Math.random() * 110,
     r: Math.random() * 1.3 + 0.5,
-    vy: Math.random() * 0.14 + 0.06, // سرعة بطيئة جداً
+    vy: Math.random() * 0.14 + 0.06,
     vx: (Math.random() - 0.5) * 0.08,
     alpha: Math.random() * 0.45 + 0.25
   }));
@@ -34,7 +34,7 @@
     offset: i * 0.35
   }));
 
-  // حالة الفراشة الشتوية المنورة
+  // Glowing winter butterfly state
   let butterfly = {
     active: false,
     x: 0,
@@ -44,8 +44,8 @@
     leaving: false
   };
 
-  // حالة القطة بكل مراحل اللعب والنوم
-  // المراحل: sit_by_man -> walk_out -> spin -> roll -> chase_butterfly -> nap -> wake_stretch -> walk_back
+  // Cat state machine
+  // States: sit_by_man -> walk_out -> spin -> roll -> chase_butterfly -> nap -> wake_stretch -> walk_back
   let cat = {
     x: 0,
     homeX: 0,
@@ -81,7 +81,7 @@
     ctx.save();
     ctx.translate(b.x, b.y);
 
-    // هالة نور خفيفة حوالين الفراشة عشان تبان في الليل
+    // Subtle glow around the butterfly for visibility at night
     const glow = ctx.createRadialGradient(0, 0, 1, 0, 0, 10);
     glow.addColorStop(0, 'rgba(125, 211, 252, 0.45)');
     glow.addColorStop(1, 'rgba(125, 211, 252, 0)');
@@ -90,14 +90,14 @@
     ctx.arc(0, 0, 10, 0, Math.PI * 2);
     ctx.fill();
 
-    // رفرفة الجناحات
+    // Wing flapping animation
     const flap = Math.abs(Math.sin(time * 18));
     ctx.fillStyle = '#7dd3fc';
-    // جناح أمامي
+    // Front wing
     ctx.beginPath();
     ctx.ellipse(-1.5, -1.5, 3.2, 2.2 * flap + 0.5, -0.4, 0, Math.PI * 2);
     ctx.fill();
-    // جناح خلفي
+    // Back wing
     ctx.fillStyle = '#bae6fd';
     ctx.beginPath();
     ctx.ellipse(1.5, -1, 2.5, 1.8 * flap + 0.4, 0.4, 0, Math.PI * 2);
@@ -110,7 +110,7 @@
     ctx.save();
     ctx.translate(c.x, groundY + c.jumpY);
 
-    // لو بتلف حوالين نفسها بنغير الاتجاه بنعومة
+    // Smooth horizontal flip while spinning in place
     let scaleX = c.dir;
     if (c.state === 'spin') {
       scaleX = Math.cos(c.timer * 5.5) >= 0 ? 1 : -1;
@@ -120,19 +120,19 @@
     const isWalking = c.state === 'walk_out' || c.state === 'walk_back';
     const bob = isWalking ? Math.abs(Math.sin(c.walkPhase)) * 1.4 : 0;
 
-    // ظل القطة على التلج (بيصغر لما تنط)
+    // Ground shadow (shrinks slightly when jumping)
     const shadowScale = Math.max(0.4, 1 + c.jumpY / 25);
     ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
     ctx.beginPath();
     ctx.ellipse(0, -c.jumpY, 9 * shadowScale, 2.2 * shadowScale, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 1. وضع التدحرج والتدليك في الأرض (Roll & Rub)
+    // 1. Rolling and rubbing on the snow
     if (c.state === 'roll') {
       const wiggle = Math.sin(time * 9) * 0.25;
       ctx.rotate(wiggle);
 
-      // ديل بيهتز بحماس
+      // Excited tail wag
       ctx.strokeStyle = '#e67e22';
       ctx.lineWidth = 2.4;
       ctx.lineCap = 'round';
@@ -141,13 +141,13 @@
       ctx.quadraticCurveTo(-13, -7 + Math.sin(time * 14) * 4, -10, -11);
       ctx.stroke();
 
-      // جسم ممدد على ضهره/جنبه
+      // Body lying on its back/side
       ctx.fillStyle = '#ff9f43';
       ctx.beginPath();
       ctx.ellipse(0, -4.5, 8.5, 4.5, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // رجولها لفوق بتتحرك وهي بتتدلع
+      // Paws playful movement in the air
       const pawMove = Math.sin(time * 12) * 1.8;
       ctx.strokeStyle = '#ffbe76';
       ctx.lineWidth = 2;
@@ -156,17 +156,17 @@
       ctx.moveTo(2, -7); ctx.lineTo(3, -11 - pawMove);
       ctx.stroke();
 
-      // راسها مايلة ومغمضة مبسوطة
+      // Tilted happy head
       ctx.fillStyle = '#ff9f43';
       ctx.beginPath();
       ctx.arc(7, -5.5, 4.5, 0, Math.PI * 2);
       ctx.fill();
-      // ودان
+      // Ears
       ctx.beginPath();
       ctx.moveTo(4, -8.5); ctx.lineTo(5, -12); ctx.lineTo(7, -9);
       ctx.moveTo(8, -9); ctx.lineTo(10, -12); ctx.lineTo(11, -8);
       ctx.fill();
-      // عين مغمضة بسعادة ^_^
+      // Happy closed eye (^_^)
       ctx.strokeStyle = '#2d1600';
       ctx.lineWidth = 1.1;
       ctx.beginPath();
@@ -177,9 +177,9 @@
       return;
     }
 
-    // 2. وضع الاستلقاء والنوم العميق (Nap - 25 ثانية)
+    // 2. Lying down and taking a deep nap (25 seconds)
     if (c.state === 'nap') {
-      // ديل ملفوف حواليها وبيتحرك ببطء شديد
+      // Slow breathing tail sway
       const tailBreath = Math.sin(time * 1.8) * 1.5;
       ctx.strokeStyle = '#e67e22';
       ctx.lineWidth = 2.4;
@@ -189,42 +189,42 @@
       ctx.quadraticCurveTo(-11, -3 + tailBreath, -8, -7);
       ctx.stroke();
 
-      // جسم مفرود ومستلقي على التلج مع حركة تنفس
+      // Stretched sleeping body with gentle breathing motion
       const breath = Math.sin(time * 2) * 0.4;
       ctx.fillStyle = '#ff9f43';
       ctx.beginPath();
       ctx.ellipse(-1, -4, 8.5, 4.2 + breath, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // كفوف أمامية ممدودة
+      // Extended front paws
       ctx.fillStyle = '#ffbe76';
       ctx.beginPath();
       ctx.roundRect(5, -2.5, 5, 2.5, 1.2);
       ctx.fill();
 
-      // راسها ساندة على الأرض
+      // Head resting on the ground
       ctx.fillStyle = '#ff9f43';
       ctx.beginPath();
       ctx.arc(6.5, -5.5, 4.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // ودان
+      // Ears
       ctx.beginPath();
       ctx.moveTo(3.5, -8.5); ctx.lineTo(4.5, -12); ctx.lineTo(6.5, -9);
       ctx.moveTo(7.5, -9); ctx.lineTo(9.5, -12); ctx.lineTo(10.5, -8);
       ctx.fill();
 
-      // عين مغمضة في النوم
+      // Closed sleeping eye
       ctx.strokeStyle = '#2d1600';
       ctx.lineWidth = 1.1;
       ctx.beginPath();
       ctx.moveTo(6, -5.5); ctx.quadraticCurveTo(7.5, -4, 9, -5.5);
       ctx.stroke();
 
-      // حرف z صغير بيطلع بهدوء وهي نايمة
+      // Floating "z" while napping
       const zPhase = (time * 0.4) % 1;
       ctx.save();
-      ctx.scale(scaleX, 1); // عشان الحرف ما يبقاش معكوس
+      ctx.scale(scaleX, 1); // Keep letter unmirrored
       ctx.fillStyle = `rgba(255, 190, 118, ${(1 - zPhase) * 0.75})`;
       ctx.font = 'bold 7px monospace';
       ctx.fillText('z', 5 * scaleX + zPhase * 4, -12 - zPhase * 9);
@@ -234,9 +234,9 @@
       return;
     }
 
-    // 3. وضع التمطع وهز الديل بعد الصحيان (Wake & Stretch)
+    // 3. Waking up, stretching, and wagging tail
     if (c.state === 'wake_stretch') {
-      const stretch = Math.sin((c.timer / 3.5) * Math.PI); // تقوس الضهر
+      const stretch = Math.sin((c.timer / 3.5) * Math.PI); // Arched back
       ctx.strokeStyle = '#e67e22';
       ctx.lineWidth = 2.4;
       ctx.lineCap = 'round';
@@ -245,13 +245,13 @@
       ctx.quadraticCurveTo(-11, -15 + Math.sin(time * 10) * 4, -8, -19);
       ctx.stroke();
 
-      // جسم مقوس لفوق
+      // Arched torso
       ctx.fillStyle = '#ff9f43';
       ctx.beginPath();
       ctx.ellipse(0, -6 - stretch * 2.5, 8, 4.5, -stretch * 0.25, 0, Math.PI * 2);
       ctx.fill();
 
-      // رجول مفرودة لقدام ولورا
+      // Extended legs
       ctx.strokeStyle = '#ffbe76';
       ctx.lineWidth = 2.2;
       ctx.beginPath();
@@ -259,7 +259,7 @@
       ctx.moveTo(5, -4); ctx.lineTo(9, 0);
       ctx.stroke();
 
-      // راس واطية لقدام في التمطع
+      // Lowered head during stretch
       ctx.fillStyle = '#ff9f43';
       ctx.beginPath();
       ctx.arc(8, -7 + stretch * 2, 4.5, 0, Math.PI * 2);
@@ -273,7 +273,7 @@
       return;
     }
 
-    // 4. الأوضاع العادية: القعدة، المشي، الدوران، والنط على الفراشة
+    // 4. Standard states: sitting, walking, spinning, and chasing butterfly
     const tailSpeed = (c.state === 'chase_butterfly' || c.state === 'spin') ? 11 : (isWalking ? 6 : 2.5);
     const tailSway = Math.sin(time * tailSpeed) * 4.5;
     ctx.strokeStyle = '#e67e22';
@@ -327,7 +327,7 @@
     ctx.arc(headX, headY, 5, 0, Math.PI * 2);
     ctx.fill();
 
-    // الودان
+    // Ears
     ctx.beginPath();
     ctx.moveTo(headX - 3.5, headY - 3);
     ctx.lineTo(headX - 2, headY - 7.5);
@@ -337,7 +337,7 @@
     ctx.lineTo(headX + 4, headY - 2.5);
     ctx.fill();
 
-    // العين (مفتوحة بتركيز لما تلعب أو تطارد الفراشة، ومغمضة لما تقعد جنب النار)
+    // Eye (alert when playing/walking, drowsy/closed when sitting by the fire)
     ctx.strokeStyle = '#2d1600';
     ctx.lineWidth = 1.1;
     ctx.beginPath();
@@ -361,7 +361,7 @@
     const breathe = Math.sin(time * 2) * 0.6;
     const stirArm = Math.sin(time * 2.6) * 2.2;
 
-    // جذع الشجرة
+    // Tree log seat
     ctx.fillStyle = '#3b281c';
     ctx.beginPath();
     ctx.roundRect(-10, -8, 18, 8, 3);
@@ -371,7 +371,7 @@
     ctx.arc(-10, -4, 3.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // الرجلين
+    // Legs
     ctx.strokeStyle = '#1e293b';
     ctx.lineWidth = 5;
     ctx.lineCap = 'round';
@@ -381,13 +381,13 @@
     ctx.lineTo(-12, -1);
     ctx.stroke();
 
-    // الجسم
+    // Torso
     ctx.fillStyle = '#2c3e50';
     ctx.beginPath();
     ctx.roundRect(-7, -25 + breathe, 13, 18, 5);
     ctx.fill();
 
-    // الشال البرتقالي
+    // Warm orange scarf
     ctx.fillStyle = '#e67e22';
     ctx.beginPath();
     ctx.roundRect(-6, -26 + breathe, 11, 4, 2);
@@ -396,13 +396,13 @@
     ctx.roundRect(-1, -24 + breathe, 3.5, 9, 1.5);
     ctx.fill();
 
-    // الراس
+    // Head
     ctx.fillStyle = '#e0a98f';
     ctx.beginPath();
     ctx.arc(-1, -30 + breathe, 4.8, 0, Math.PI * 2);
     ctx.fill();
 
-    // الطاقية
+    // Winter beanie
     ctx.fillStyle = '#c0392b';
     ctx.beginPath();
     ctx.arc(-1, -31.5 + breathe, 5, Math.PI, 0);
@@ -411,7 +411,7 @@
     ctx.arc(0, -37 + breathe, 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // الذراع والمعلقة
+    // Arm and wooden spoon stirring the pot
     ctx.strokeStyle = '#34495e';
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
@@ -427,7 +427,7 @@
     ctx.lineTo(-24, -11 + stirArm * 0.6);
     ctx.stroke();
 
-    // بخار النفس
+    // Cold breath vapor
     const breathCycle = (time * 0.5) % 1;
     if (breathCycle < 0.6) {
       ctx.fillStyle = `rgba(226, 232, 240, ${(0.6 - breathCycle) * 0.3})`;
@@ -451,6 +451,7 @@
     ctx.arc(fireX, groundY - 8, glowRadius, 0, Math.PI * 2);
     ctx.fill();
 
+    // Firewood logs
     ctx.strokeStyle = '#4a2e1b';
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
@@ -459,6 +460,7 @@
     ctx.moveTo(fireX + 9, groundY - 1); ctx.lineTo(fireX - 8, groundY - 5);
     ctx.stroke();
 
+    // Outer orange flame
     const f1 = Math.sin(time * 9) * 2;
     const f2 = Math.cos(time * 12) * 1.5;
     ctx.fillStyle = '#ff793f';
@@ -469,6 +471,7 @@
     ctx.closePath();
     ctx.fill();
 
+    // Inner warm yellow flame
     ctx.fillStyle = '#ffda79';
     ctx.beginPath();
     ctx.moveTo(fireX - 4, groundY - 3);
@@ -477,6 +480,7 @@
     ctx.closePath();
     ctx.fill();
 
+    // Cooking pot tripod
     ctx.strokeStyle = '#334155';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
@@ -485,6 +489,7 @@
     ctx.lineTo(fireX + 11, groundY);
     ctx.stroke();
 
+    // Hanging cooking pot
     ctx.fillStyle = '#1e293b';
     ctx.beginPath();
     ctx.roundRect(fireX - 6, groundY - 19, 12, 7, 2);
@@ -493,6 +498,7 @@
     ctx.lineWidth = 1;
     ctx.strokeRect(fireX - 6, groundY - 19, 12, 7);
 
+    // Rising steam from the pot
     steams.forEach((s) => {
       const p = (time * 0.4 + s.offset) % 1;
       const sx = fireX + Math.sin(p * 6 + s.offset * 5) * 3;
@@ -503,6 +509,7 @@
       ctx.fill();
     });
 
+    // Rising fire embers
     embers.forEach((e) => {
       if (e.life <= 0) {
         e.x = fireX + (Math.random() - 0.5) * 8;
@@ -529,7 +536,7 @@
     const dt = 1 / 60;
     cat.timer += dt;
 
-    // 1. قاعدة جنب الراجل والنار (6 ثواني)
+    // 1. Sit warmly next to the person and campfire (6 seconds)
     if (cat.state === 'sit_by_man') {
       cat.dir = -1;
       if (cat.timer > 6) {
@@ -537,7 +544,7 @@
         cat.timer = 0;
       }
     }
-    // 2. بتتمشى بعيد ناحية الشمال
+    // 2. Walk out toward the snowy left side
     else if (cat.state === 'walk_out') {
       cat.dir = -1;
       cat.x -= 0.42;
@@ -547,7 +554,7 @@
         cat.timer = 0;
       }
     }
-    // 3. بتلف حوالين نفسها مرتين بحماس (3 ثواني)
+    // 3. Spin around playfully (3.2 seconds)
     else if (cat.state === 'spin') {
       if (cat.timer > 3.2) {
         cat.state = 'roll';
@@ -555,13 +562,13 @@
         cat.dir = -1;
       }
     }
-    // 4. بتنام على الأرض وتتدلك وتهز ديلها (4.5 ثواني)
+    // 4. Lie down, rub in the snow, and wag tail (4.5 seconds)
     else if (cat.state === 'roll') {
       if (cat.timer > 4.5) {
         cat.state = 'chase_butterfly';
         cat.timer = 0;
         cat.jumpsDone = 0;
-        // ظهور الفراشة قدامها
+        // Spawn butterfly in front of the cat
         butterfly.active = true;
         butterfly.leaving = false;
         butterfly.x = cat.x - 16;
@@ -570,23 +577,23 @@
         butterfly.timer = 0;
       }
     }
-    // 5. بتشوف فراشة بتطير وتقعد تنط عليها
+    // 5. Spot flying butterfly and jump to catch it
     else if (cat.state === 'chase_butterfly') {
       butterfly.timer += dt;
 
       if (!butterfly.leaving) {
-        // الفراشة بترفرف قدام القطة يمين وشمال
+        // Butterfly flutters back and forth
         butterfly.x = cat.x - 14 + Math.sin(butterfly.timer * 2.5) * 14;
         butterfly.y = butterfly.baseY + Math.cos(butterfly.timer * 4) * 5;
         cat.dir = butterfly.x < cat.x ? -1 : 1;
 
-        // فيزياء النطة بتاعة القطة
+        // Cat jump physics
         if (cat.jumpY === 0 && cat.jumpsDone < 3 && Math.floor(butterfly.timer * 1.1) > cat.jumpsDone) {
           cat.jumpVy = -3.4;
           cat.jumpsDone++;
         }
       } else {
-        // الفراشة تطير لفوق وتختفي
+        // Butterfly flies upward and disappears
         butterfly.y -= 0.55;
         butterfly.x -= 0.3;
         if (butterfly.y < -10) {
@@ -594,10 +601,10 @@
         }
       }
 
-      // تحديث الجاذبية للنطة
+      // Apply gravity to cat jump
       if (cat.jumpY < 0 || cat.jumpVy < 0) {
         cat.jumpY += cat.jumpVy;
-        cat.jumpVy += 0.22; // جاذبية
+        cat.jumpVy += 0.22;
         if (cat.jumpY >= 0) {
           cat.jumpY = 0;
           cat.jumpVy = 0;
@@ -615,14 +622,14 @@
         cat.timer = 0;
       }
     }
-    // 6. تستلقي وتنام شوية لمدة 25 ثانية
+    // 6. Lie down and take a nap (25 seconds)
     else if (cat.state === 'nap') {
       if (cat.timer > 25) {
         cat.state = 'wake_stretch';
         cat.timer = 0;
       }
     }
-    // 7. تصحى وتتمطع وتهز ديلها شوية (3.5 ثواني)
+    // 7. Wake up, stretch, and wag tail (3.5 seconds)
     else if (cat.state === 'wake_stretch') {
       cat.dir = 1;
       if (cat.timer > 3.5) {
@@ -630,7 +637,7 @@
         cat.timer = 0;
       }
     }
-    // 8. ترجع تتمشى للراجل اللي قاعد جنب النار
+    // 8. Walk back to the person sitting by the campfire
     else if (cat.state === 'walk_back') {
       cat.dir = 1;
       cat.x += 0.45;
@@ -647,14 +654,14 @@
     t += 0.016;
     const groundY = H - 14;
 
-    // 1. سماء شتوية
+    // 1. Winter night sky
     const sky = ctx.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, '#090d16');
     sky.addColorStop(1, '#131926');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
 
-    // القمر
+    // Crescent moon
     ctx.fillStyle = 'rgba(241, 245, 249, 0.85)';
     ctx.beginPath();
     ctx.arc(34, 22, 7, 0, Math.PI * 2);
@@ -664,12 +671,12 @@
     ctx.arc(37, 20, 6.2, 0, Math.PI * 2);
     ctx.fill();
 
-    // 2. الأشجار
+    // 2. Background pine trees
     drawPineTree(55, groundY, 0.85, '#111927');
     drawPineTree(85, groundY, 1.05, '#152030');
     drawPineTree(W - 35, groundY, 0.9, '#111927');
 
-    // 3. الأرضية الثلجية
+    // 3. Snow ground
     ctx.fillStyle = '#cbd5e1';
     ctx.fillRect(0, groundY, W, H - groundY);
     ctx.fillStyle = '#f1f5f9';
@@ -685,16 +692,16 @@
     const fireX = W - 92;
     const personX = W - 58;
 
-    // 4. النار والأكل + الراجل
+    // 4. Campfire, cooking pot, and sitting person
     drawCampfireAndPot(fireX, groundY, t);
     drawPerson(personX, groundY, t);
 
-    // 5. تحديث ورسم القطة والفراشة
+    // 5. Update and draw cat and butterfly
     updateScenario(fireX, personX, groundY);
     drawButterfly(butterfly, t);
     drawCat(cat, groundY, t);
 
-    // 6. الثلج البطيء
+    // 6. Slow falling snowflakes
     snowflakes.forEach((s) => {
       s.y += s.vy;
       s.x += s.vx + Math.sin(t * 0.6 + s.y * 0.04) * 0.06;
